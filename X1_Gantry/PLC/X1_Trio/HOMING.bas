@@ -10,18 +10,18 @@
 'VR(2) = 0 ' Y2 Axis Home Enable
 'VR(3) = 1 ' Y1Z Axis Home Enable
 'VR(4) = 0 ' Y2Z Axis Home Enable
-IF (NOT IN(17)) THEN
-OP(20,0)
-OP(19,1)
-WAIT UNTIL IN(17)
-OP(19,0)
-ENDIF
-
 IF (NOT IN(25)) THEN
 OP(28,0)
 OP(27,1)
 WAIT UNTIL IN(25)
 OP(27,0)
+ENDIF
+
+IF (NOT IN(33)) THEN
+OP(36,0)
+OP(35,1)
+WAIT UNTIL IN(33)
+OP(35,0)
 ENDIF
 IF (VR(0) = 1) THEN
 
@@ -33,8 +33,8 @@ PRINT "X Axis Homing Enabled, Starting Homing..."
 BASE(0) ' XAxis Homing
 
 SPEED = 5
-ACCEL = 15
-DECEL = 40
+ACCEL = 10' 15
+DECEL = 20 '40
 FASTDEC = 40
 
 REVERSE
@@ -89,7 +89,7 @@ ELSE
     ENDIF
 ENDIF
 
-OP(31,0)
+OP(39,0)
 
 ELSE ' Homing Is Disabled
     PRINT "X Axis Homing Is Disabled, Processing Next Axis..."
@@ -151,11 +151,11 @@ ELSE
     RS_LIMIT = -1
     FS_LIMIT = 259
     PRINT "Y1 Homed"
-    OP(19,1)
+    OP(27,1)
     VR(92) = TIME
-    WAIT UNTIL ((IN(17) = 1) OR ((TIME-VR(92)) > 60))
-    OP(19,0)
-    IF (IN(17) = 0) THEN
+    WAIT UNTIL ((IN(25) = 1) OR ((TIME-VR(92)) > 60))
+    OP(27,0)
+    IF (IN(25) = 0) THEN
         PRINT "Issues Raising Y1 Plotter Head..."
         GOTO exit
     ELSE
@@ -164,7 +164,7 @@ ELSE
     ENDIF
 ENDIF
 OP(12,0)
-OP(31,0)
+OP(39,0)
 SERVO = 0
 
 
@@ -228,11 +228,11 @@ VR(104) = MPOS AXIS(2)
     FS_LIMIT = 289
     PRINT "Y2 Homed"
 SPEED = 5
-    OP(27,1)
+    OP(35,1)
     VR(92) = TIME
-    WAIT UNTIL ((IN(25) = 1) OR ((TIME-VR(92)) > 60))
-    OP(27,0)
-    IF (IN(25) = 0) THEN
+    WAIT UNTIL ((IN(33) = 1) OR ((TIME-VR(92)) > 60))
+    OP(35,0)
+    IF (IN(33) = 0) THEN
         PRINT "Issues Raising Y2 Plotter Head..."
         GOTO exit
     ELSE
@@ -242,7 +242,7 @@ SPEED = 5
 
     ENDIF
 ENDIF
-OP(31,0)
+OP(39,0)
 OP(13,0)
 SERVO = 0
 
@@ -277,20 +277,20 @@ IF ((VR(8) - MPOS) > 720) THEN
     VR(8) = 3
     GOTO print_result_z1
 ELSE
-    IF (IN(16) = 1) THEN
+    IF (IN(24) = 1) THEN
         CANCEL
         CANCEL
         WAIT IDLE
         WA(1000)
         SPEED = 1
         REVERSE
-        WAIT UNTIL IN(16) = 0
+        WAIT UNTIL IN(24) = 0
         CANCEL
         CANCEL
         WAIT IDLE
         WA(1000)
         SPEED = 40
-        MOVE(-175) 'move to offset for 0 position
+        MOVE(-175) '175 move to offset for 0 position
         WAIT IDLE
         DEFPOS(0)
 VR(105) = MPOS AXIS(4)
@@ -310,7 +310,7 @@ IF (VR(8) = 2) THEN
 ENDIF
 OP(14,0)
 SERVO = 0
-OP(31,0)
+OP(39,0)
 ENDIF
 
 ELSE
@@ -327,8 +327,8 @@ IF (VR(4) = 1) THEN
 
 BASE(5) ' Y1ZAxis Homing
 RUN "dolights",4
-P_GAIN = 70
-D_GAIN = 625 '700
+P_GAIN = 1'70
+D_GAIN = 10 '625 '700
 SPEED = 40
 ACCEL = 400
 DECEL = 2000
@@ -347,7 +347,7 @@ IF ((VR(9) - MPOS) > 720) THEN
     VR(9) = 3
     GOTO print_result_z2
 ELSE
-    IF (IN(24) = 1) THEN
+    IF (IN(32) = 1) THEN
 
         CANCEL
         CANCEL
@@ -355,13 +355,13 @@ ELSE
         WA(1000)
         SPEED = 1
         REVERSE
-        WAIT UNTIL IN(24) = 0
+        WAIT UNTIL IN(32) = 0
         CANCEL
         CANCEL
         WAIT IDLE
         WA(1000)
         SPEED = 40
-        MOVE(-165.5) 'move to offset for 0 position
+        MOVE(-175.5) '165.5move to offset for 0 position
         WAIT IDLE
         DEFPOS(0)
 VR(106) = MPOS AXIS(5)
@@ -385,7 +385,7 @@ IF (VR(9) = 2) THEN
     PRINT "Y2Z Axis Homed"
     OP(15,0)
     SERVO = 0
-    OP(31,0)
+    OP(39,0)
     GOTO no_errors
 ENDIF
 

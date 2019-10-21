@@ -1,19 +1,19 @@
 IF (VR(34) = 1) THEN
     BASE(5)
-    P_GAIN = 70 '60
-    D_GAIN = 625 '650
+    P_GAIN = 1 '70 '60
+    D_GAIN = 10 ' '625 '650
     BASE(4)
-    P_GAIN = 70
-    D_GAIN = 750
+    P_GAIN = 2 '1' 70
+    D_GAIN = 16 '8 '750
     BASE(4,5)
 ELSEIF (VR(120) = 1) THEN
     BASE(4)
-    P_GAIN = 70
-    D_GAIN= 700'30 ' 16 ' 12
+    P_GAIN = 2 '1 '50 '65 ''70
+    D_GAIN= 16 '8 '805 ''700'30 ' 16 ' 12
 ELSEIF (VR(121) = 1) THEN
-     BASE(5)
-    P_GAIN = 70 '60'30
-    D_GAIN = 625 '650'750
+    BASE(5)
+    P_GAIN = 1 '70 '60'30
+    D_GAIN = 15 ' 625 '650'750
 ENDIF
 
 
@@ -30,27 +30,28 @@ dposx1 = 0
 dposy1 = 0
 txdir = 0
 tydir = 0
+' 360 Multiplier for rotation count
 VR(62) = 0
-VR(64) = 3.5 '4.25 '3.5
+' Delay in MS between polling for new direction
+VR(64) = 10 '15' 3.5 '4.25 '3.5
 'VR(35) = ACCEL ' VR(35) in use
+' Directional deadband
+' Minimum distance covered an an axis to be used in directional measurement
 VR(69) = .005
 
 
 WHILE 1 = 1
 'IF(VP_SPEED AXIS(0)>0.05 OR VP_SPEED AXIS(1)>0.05 ORVP_SPEED AXIS(2)>0.05) THE
 
-IF (VR(34) = 1) THEN
-    BASE(4,5)
+ IF (VR(34) = 1) THEN
+ BASE(4,5)
+ ELSEIF (VR(120) = 1) THEN
+ BASE(4)
+ ELSEIF (VR(121) = 1) THEN
+ BASE(5)
+ ENDIF
 
-ELSEIF (VR(120) = 1) THEN
-    BASE(4)
-
-ELSEIF (VR(121) = 1) THEN
-     BASE(5)
-
-ENDIF
-    IF ((VR( (VR(65)+(VR(66)*9)) ) = 0) )THEN
-
+ IF ((VR( (VR(65)+(VR(66)*9)) ) = 0) )THEN
         IF (VR(75) < 1) THEN
             SPEED = 150
         ELSEIF (VR(75) < 2) THEN
@@ -59,11 +60,9 @@ ENDIF
             SPEED = 22.5
         ELSEIF (VR(75) < 10) THEN
             SPEED = 30
-
         ELSE
             SPEED = 120
         ENDIF
-
     ELSE ' it is an arc
         IF (VR(89) = 0) THEN
             SPEED = 270'120
@@ -74,18 +73,14 @@ ENDIF
         ELSEIF(VR(89) < 170) THEN
             SPEED = 180' 150
         ELSE
-            SPEED = 175'140
+            SPEED = 175'140 'reduce speed 20190808
         ENDIF
-
-
-
-    ENDIF
+    ENDIF ' Selection of element type
 
    'Code to retrieve and store DPOS to obtain the vector of X & Y
     dposx0 = DPOS AXIS(0)
     IF (VR(121) = 1) THEN
         dposy0 = DPOS AXIS(2)
-
     ELSE
         dposy0 = DPOS AXIS(1)
     ENDIF
@@ -135,9 +130,7 @@ IF(VP_SPEED AXIS(0)>.04 OR VP_SPEED AXIS(1)>.04 OR VP_SPEED AXIS(2)>.04) THEN
 
    '         PRINT #6,newdeg
 
-
-
-        ELSE
+        ELSE ' There is no */90 even movement
 
             'Get the current vector in radians
             newdeg = ATAN2(INT(tydir),INT(txdir))
@@ -158,16 +151,13 @@ IF(VP_SPEED AXIS(0)>.04 OR VP_SPEED AXIS(1)>.04 OR VP_SPEED AXIS(2)>.04) THEN
             ELSEIF (xpos >0 AND ypos <0) THEN
                 newdeg = newdeg + 180
             ENDIF
-
-
-
           '  PRINT #6, "X: ", xdir, "Y: ", ydir, "Rel:", chgdeg, "new: ", newdeg
            ' PRINT #6, "DPos: ", MPOS
 
         ENDIF ' End error corrction code
 
-     'Formula for moving the shortest distance, less than 180 degrees
-
+    'Formula for moving the shortest distance, less than 180 degrees
+    ' 360 Multiplier, will allow for endless circle without resetting dpos
     IF((olddeg - (newdeg + VR(62)*360)) > 180) THEN
           VR(62) = VR(62) + 1
     ELSEIF ((olddeg - (newdeg + VR(62)*360)) < -180) THEN
@@ -177,36 +167,29 @@ IF(VP_SPEED AXIS(0)>.04 OR VP_SPEED AXIS(1)>.04 OR VP_SPEED AXIS(2)>.04) THEN
     IF (ABS(xdir) > VR(69)) OR (ABS(ydir) > VR(69)) THEN
         'IF ((ABS((newdeg + (VR(62) *360))-olddeg) >10)) THEN
      '       PRINT #6,"new:",(newdeg + (VR(62) *360))
-           CANCEL
+ ' Cancel movement - but we are using merge, maybe do not cancel unless another
+        CANCEL
 
         IF (VR(34) = 1) THEN
             BASE(4,5)
             MOVEABS(newdeg + (VR(62) *360),newdeg + (VR(62) *360))
-
-       ELSEIF (VR(120) = 1) THEN
-           MOVEABS(newdeg + (VR(62) *360)) AXIS(4) 'Move relative degrees
-
-       ELSEIF (VR(121) = 1) THEN
+        ELSEIF (VR(120) = 1) THEN
+            MOVEABS(newdeg + (VR(62) *360)) AXIS(4) 'Move relative degrees
+        ELSEIF (VR(121) = 1) THEN
             MOVEABS(newdeg + (VR(62) *360)) AXIS(5) 'Move relative degrees
-
-         ENDIF
-            WAIT IDLE
+        ENDIF
+ ' If we are moving the head, wait until it's done
+        WAIT IDLE
     ENDIF
 
-
-IF (VR(120) = 1) THEN
-     olddeg = DPOS AXIS(4)
-
-ELSEIF (VR(121) = 1) THEN
-
-    olddeg = DPOS AXIS(5)
-ENDIF
+ IF (VR(120) = 1) THEN
+ olddeg = DPOS AXIS(4)
+ ELSEIF (VR(121) = 1) THEN
+ olddeg = DPOS AXIS(5)
+ ENDIF
 ENDIF ' End dead band code
 
-WA(VR(64)) 'Wait 15 milliseconds to get net change in x & y
-
-
-
+WA(VR(64)) 'Wait X milliseconds to get net change in x & y
 
 'ENDIF
 WEND 'while 1=1

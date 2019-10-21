@@ -9,6 +9,9 @@ VR(91) = -1
 VR(16) = 0 ' Reset pause
 VR(17) = 0 ' Reset stop button
 
+VR(135) = 0
+VR(136) = 0
+
 IF (VR(120) = 1) THEN
 
     BASE(1)
@@ -48,16 +51,9 @@ ELSE
 ENDIF
 
 
-OP(31,1)
+OP(39,1)
 
 'Reset Z
-IF (NOT IN(17)) THEN
-OP(20,0)
-OP(19,1)
-WAIT UNTIL IN(17)
-OP(19,0)
-ENDIF
-
 IF (NOT IN(25)) THEN
 OP(28,0)
 OP(27,1)
@@ -65,10 +61,17 @@ WAIT UNTIL IN(25)
 OP(27,0)
 ENDIF
 
-OP(19,0)
-OP(20,0)
+IF (NOT IN(33)) THEN
+OP(36,0)
+OP(35,1)
+WAIT UNTIL IN(33)
+OP(35,0)
+ENDIF
+
 OP(27,0)
 OP(28,0)
+OP(35,0)
+OP(36,0)
 
 'reset erroneous connect statements
 BASE(2)
@@ -188,18 +191,18 @@ WHILE VR(76) = 0
                     BASE(0,1)
                 ELSE ' this is not a double job
         IF (VR(120) = 1) THEN ' YA Job
-
-                    BASE(2)
-                    IF (MPOS < 276) THEN
-                        SPEED = 10
-                        ACCEL = 10
-                        DECEL = 10
-                        SERVO = 1
-                        OP(13,1)
-                        MOVEABS(276.67)
-                        WAIT IDLE
-                        OP(13,0)
-                    ENDIF
+'Disabled Based 2 temporary in order to run Ya 20190717
+            BASE(2)
+            IF (MPOS < 276) THEN
+                SPEED = 10
+                ACCEL = 10
+                DECEL = 10
+                SERVO = 1
+                OP(13,1)
+                MOVEABS(276.67)
+                WAIT IDLE
+                OP(13,0)
+            ENDIF
                     BASE(0,1)
 
          ELSE 'YB Job
@@ -318,8 +321,8 @@ ELSEIF (VR(121) = 1) THEN
 ENDIF
 
            WAIT UNTIL (VR(16) = 0)
-           ACCEL = 25
-           DECEL = 25
+           ACCEL = 12'25
+           DECEL = 12' 25
            SPEED = 10
 
            PRINT #6, "Please Press Pause to drop head"
@@ -334,25 +337,25 @@ ENDIF
     IF (VR(34) = 1) THEN
             ' If this is in plot mode then
             IF (VR(82) = 0) THEN
-               OP(20,1)
                OP(28,1)
-               WAIT UNTIL ((IN(18) AND NOT IN(17)) AND (IN(26) AND NOT IN(25)))
-               OP(21,1)
+               OP(36,1)
+               WAIT UNTIL ((IN(26) AND NOT IN(25)) AND (IN(34) AND NOT IN(33)))
                OP(29,1)
+               OP(37,1)
                WA(2000)
            ENDIF
 
     ELSE
            IF (VR(82) = 0) THEN
 IF (VR(120) = 1) THEN
-               OP(20,1)
-               WAIT UNTIL (IN(18) AND NOT IN(17))
-               OP(21,1)
-
-ELSEIF (VR(121) = 1) THEN
                OP(28,1)
                WAIT UNTIL (IN(26) AND NOT IN(25))
                OP(29,1)
+
+ELSEIF (VR(121) = 1) THEN
+               OP(36,1)
+               WAIT UNTIL (IN(34) AND NOT IN(33))
+               OP(37,1)
 ENDIF
            WA(2000)
 
@@ -470,8 +473,20 @@ ENDIF
        VR(75) = SQR(VR(87)+VR(88))
 
 
-    'set arc degrees
-        VR(89) = (2* (ASIN(VR(77)/(2*VR(75)))*(180/3.14) ) )
+       'set arc degrees
+       'VR(135) = (VR(77)/(2.00001 *VR(75)))*(180/3.1415)
+       VR(135) = (VR(77)/(2.00001 *VR(75)))
+
+       IF VR(135) > 1 THEN
+           VR(136) = 1
+       ELSE
+           VR(136) = VR (135)
+       ENDIF
+
+
+       'VR(89) = (2* (ASIN(VR(77)/(2.00001 *VR(75)))*(180/3.1415) ) )
+       VR (89) = (2* (ASIN(VR (136 ))*(180/3.1415) ))
+
            ACCEL = 3 '2
            DECEL = 2.5
         WAIT UNTIL SPEED AXIS(0) <> 0
@@ -489,7 +504,8 @@ ENDIF
                WAIT UNTIL VR(16) = 0
                 PRINT #7,"CC: ",VR(85),VR(86),VR(71)-VR(83),VR(72)-VR(84),VR(89)
 
-               MOVECIRC(VR(85),VR(86),(VR(71)-VR(83)),(VR(72)-VR(84)),0)
+                MOVECIRC(VR(85),VR(86),(VR(71)-VR(83)),(VR(72)-VR(84)),0)
+
            ENDIF '           IF (VR( (VR(65)+(VR(66)*9)) ) = 2) THEN
          '  IF this is a double mat
 
@@ -530,33 +546,33 @@ WAIT UNTIL SPEED AXIS(0) <> 0
 
     ' If it is a double job drop both heads
     IF (VR(34) = 1) THEN
-      OP(21,0)
-     OP(20,0)
-     OP(29,0)
+      OP(29,0)
      OP(28,0)
+     OP(37,0)
+     OP(36,0)
     WA(250)
-    OP(19,1)
     OP(27,1)
-    WAIT UNTIL ((NOT IN(18) AND IN(17)) AND (NOT IN(26) AND IN(25)))
-    OP(19,0)
+    OP(35,1)
+    WAIT UNTIL ((NOT IN(26) AND IN(25)) AND (NOT IN(34) AND IN(33)))
     OP(27,0)
+    OP(35,0)
 
     ELSE
     'raise a single Y
     IF (VR(120) = 1) THEN
-        OP(21,0)
-        OP(20,0)
-        WA(250)
-        OP(19,1)
-        WAIT UNTIL (NOT IN(18) AND IN(17))
-        OP(19,0)
-    ELSEIF (VR(121) = 1) THEN
         OP(29,0)
         OP(28,0)
         WA(250)
         OP(27,1)
         WAIT UNTIL (NOT IN(26) AND IN(25))
         OP(27,0)
+    ELSEIF (VR(121) = 1) THEN
+        OP(37,0)
+        OP(36,0)
+        WA(250)
+        OP(35,1)
+        WAIT UNTIL (NOT IN(34) AND IN(33))
+        OP(35,0)
     ENDIF
 ENDIF ' If not a double job
 
@@ -656,7 +672,7 @@ VR(16) = 0 ' Reset pause
 VR(17) = 0 ' Reset stop
 WA(1000)
 VR(39) = 0
-OP(31,0)
+OP(39,0)
 VR(118) = 0 'we Are not moving
 'VR(40) = 0 'Set plotting variable to not plotting
 

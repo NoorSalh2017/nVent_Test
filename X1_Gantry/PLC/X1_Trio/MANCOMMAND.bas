@@ -49,7 +49,7 @@ VR(9) = 0
 
 WHILE 1 = 1
 ' If we are not moving and we are not plotting and remote is pressed
-IF ((VR(118) <> 1) AND (VR(39) = 0) AND (IN(23) = 1)) THEN
+IF ((VR(118) <> 1) AND (VR(39) = 0) AND (IN(31) = 1)) THEN
 
 ' if we are homed then
 IF (VR(5) = 2) AND (VR(6) = 2)AND(VR(7) = 2)AND(VR(8) = 2) AND (VR(9) = 2) THEN
@@ -68,7 +68,7 @@ IF (VR(5) = 2) AND (VR(6) = 2)AND(VR(7) = 2)AND(VR(8) = 2) AND (VR(9) = 2) THEN
         '  VR(96) = 1
       '  VR(95) = 1
        ENDIF
-WAIT UNTIL IN(23) = 0
+WAIT UNTIL IN(31) = 0
 ELSE
     PRINT "Some axis not homed, will not allow remote start"
     VR(91) = 15
@@ -139,11 +139,11 @@ ENDIF
     IF( PROC_STATUS PROC(10) = 0) THEN
             VR(123) = 0 ' Remove remote movement command from buffer
         'start routine
-            IF (IN(22) = 0) AND (VR(31) = 1) THEN
+            IF (IN(30) = 0) AND (VR(31) = 1) THEN
             VR(91) = 25
             VR(90) = 1
 
-            ELSEIF (IN(30) = 0) AND (VR(32) = 1) THEN
+            ELSEIF (IN(38) = 0) AND (VR(32) = 1) THEN
 
             VR(91) = 26
             VR(90) = 1
@@ -168,13 +168,6 @@ ENDIF
                 WA(2000)
             ENDIF
 VR(118) = 1 ' we are moving
-IF (NOT IN(17)) THEN
-OP(20,0)
-OP(19,1)
-WAIT UNTIL IN(17)
-OP(19,0)
-ENDIF
-
 IF (NOT IN(25)) THEN
 OP(28,0)
 OP(27,1)
@@ -182,11 +175,18 @@ WAIT UNTIL IN(25)
 OP(27,0)
 ENDIF
 
+IF (NOT IN(33)) THEN
+OP(36,0)
+OP(35,1)
+WAIT UNTIL IN(33)
+OP(35,0)
+ENDIF
+
 
         IF (IN(12) = 0) THEN
             RUN "enableys",9
         ENDIF
-        OP(31,1)
+        OP(39,1)
         ' if Y1 Enabled
         IF (VR(31) = 1) THEN
               WAIT UNTIL (IN(12))
@@ -267,7 +267,7 @@ ENDIF
 
             WAIT UNTIL(PROC_STATUS PROC(9) = 0)
             RUN "enableys",9
-            OP(31,0)
+            OP(39,0)
         IF (VR(15) = 0) THEN
             VR(91) = 8
             VR(90) = 1
@@ -275,47 +275,47 @@ ENDIF
         VR(40) = 0
             VR(118) = 0 'we Are not moving
     ELSEIF (VR(96) = 3) THEN ' Gluepot Head A
-        IF (IN(22) = 1) THEN
-
-            OP(22,0)
-        ELSE
-            OP(22,1)
-        ENDIF
-    ELSEIF (VR(96) = 4) THEN ' Gluepot Head B
         IF (IN(30) = 1) THEN
 
             OP(30,0)
         ELSE
             OP(30,1)
         ENDIF
+    ELSEIF (VR(96) = 4) THEN ' Gluepot Head B
+        IF (IN(38) = 1) THEN
+
+            OP(38,0)
+        ELSE
+            OP(38,1)
+        ENDIF
 
     ELSEIF (VR(96) = 5) THEN ' Raise / Lower Head A
-        IF (IN(18) = 1) THEN ' If head A is confirmed down
-            OP(21,0) ' Turn Off Air
-            OP(20,0) ' Turn off Down Solenoid
-            OP(19,1) ' Turn On Up Solenoid
-            WAIT UNTIL (IN(17) = 1)
-            OP(19,0)
-        ELSE
-            OP(19,0)
-            OP(20,1)
-            WAIT UNTIL (IN(18) = 1)
-           OP(21,1)
-'            OP(20,0)
-        ENDIF
-    ELSEIF (VR(96) = 6) THEN ' Raise / Lower Head B
-        IF (IN(26) = 1) THEN ' If head B is confirmed down
-            OP(28,0)
-            OP(29,0)
-            OP(27,1)
+        IF (IN(26) = 1) THEN ' If head A is confirmed down
+            OP(29,0) ' Turn Off Air
+            OP(28,0) ' Turn off Down Solenoid
+            OP(27,1) ' Turn On Up Solenoid
             WAIT UNTIL (IN(25) = 1)
-
             OP(27,0)
         ELSE
             OP(27,0)
             OP(28,1)
             WAIT UNTIL (IN(26) = 1)
            OP(29,1)
+'            OP(28,0)
+        ENDIF
+    ELSEIF (VR(96) = 6) THEN ' Raise / Lower Head B
+        IF (IN(34) = 1) THEN ' If head B is confirmed down
+            OP(36,0)
+            OP(37,0)
+            OP(35,1)
+            WAIT UNTIL (IN(33) = 1)
+
+            OP(35,0)
+        ELSE
+            OP(35,0)
+            OP(36,1)
+            WAIT UNTIL (IN(34) = 1)
+           OP(37,1)
 
         ENDIF
        ELSEIF (VR(96) = 7) THEN ' Run Y Enable Program
@@ -348,51 +348,51 @@ ENDIF
             BASE(5)
             WAIT IDLE
  ELSEIF (VR(96) = 9) THEN ' Raise / Lower Head A w/o Air
-        IF (IN(18) = 1) THEN ' If head A is confirmed down
-            OP(21,0) ' Turn Off Air
-            OP(20,0) ' Turn off Down Solenoid
-            OP(19,1) ' Turn On Up Solenoid
-            WAIT UNTIL (IN(17) = 1)
-            OP(19,0)
-        ELSE
-            OP(19,0)
-            OP(20,1)
-            WAIT UNTIL (IN(18) = 1)
-            ' OP(21,1)
-'            OP(20,0)
-        ENDIF
-    ELSEIF (VR(96) = 10) THEN ' Raise / Lower Head B w/o Air
-        IF (IN(26) = 1) THEN ' If head B is confirmed down
-            OP(28,0)
-            OP(29,0)
-            OP(27,1)
+        IF (IN(26) = 1) THEN ' If head A is confirmed down
+            OP(29,0) ' Turn Off Air
+            OP(28,0) ' Turn off Down Solenoid
+            OP(27,1) ' Turn On Up Solenoid
             WAIT UNTIL (IN(25) = 1)
-
             OP(27,0)
         ELSE
             OP(27,0)
             OP(28,1)
             WAIT UNTIL (IN(26) = 1)
-    '           OP(29,1)
+            ' OP(29,1)
+'            OP(28,0)
+        ENDIF
+    ELSEIF (VR(96) = 10) THEN ' Raise / Lower Head B w/o Air
+        IF (IN(34) = 1) THEN ' If head B is confirmed down
+            OP(36,0)
+            OP(37,0)
+            OP(35,1)
+            WAIT UNTIL (IN(33) = 1)
+
+            OP(35,0)
+        ELSE
+            OP(35,0)
+            OP(36,1)
+            WAIT UNTIL (IN(34) = 1)
+    '           OP(37,1)
 
         ENDIF
   ELSEIF (VR(96) = 11) THEN ' Toggle head A cooling nosels
-       IF (IN(21)) THEN
-        OP(21,0)
-       ELSE
-        OP(21,1)
-       ENDIF
-     ELSEIF (VR(96) = 12) THEN ' Toggle head B cooling nosels
        IF (IN(29)) THEN
         OP(29,0)
        ELSE
         OP(29,1)
        ENDIF
-  ELSEIF (VR(96) = 13) THEN ' Toggle side lights
-       IF (IN(31)) THEN
-        OP(31,0)
+     ELSEIF (VR(96) = 12) THEN ' Toggle head B cooling nosels
+       IF (IN(37)) THEN
+        OP(37,0)
        ELSE
-        OP(31,1)
+        OP(37,1)
+       ENDIF
+  ELSEIF (VR(96) = 13) THEN ' Toggle side lights
+      IF (IN(39)) THEN
+        OP(39,0)
+       ELSE
+        OP(39,1)
        ENDIF
 ELSEIF (VR(96) = 14) THEN ' Reset Controller
     EX ' Reset the controller to a default state

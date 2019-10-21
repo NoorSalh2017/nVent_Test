@@ -9,7 +9,7 @@ VR(114) = 0 'estop voice latch
 error_check_start:
 'Cover Estop
 
-IF ((IN(34) = 0) AND (VR(114) = 0)) THEN
+IF ((IN(42) = 0) AND (VR(114) = 0)) THEN
     VR(91) = 30
     VR(90) = 1
     VR(114) = 1
@@ -52,17 +52,17 @@ IF ((IN(34) = 0) AND (VR(114) = 0)) THEN
     BASE(5)
     SERVO = 0
 
-        OP(21,0) 'Turn off cooling air
-        OP(29,0)
+        OP(29,0) 'Turn off cooling air
+        OP(37,0)
 
         VR(39) = 0
 
-        OP(31,0)
+        OP(39,0)
 
         VR(118) = 0 ' we are not moving
 
 ELSE
-    IF (IN(34) = 1) THEN VR(114) = 0
+    IF (IN(42) = 1) THEN VR(114) = 0
 ENDIF
 
 
@@ -94,7 +94,7 @@ IF((VR(94) AND 2) > 0 OR (VR(94) AND 3) > 0 OR (VR(94) AND 8) > 0)THEN
             STOP "enableys"
             STOP "dolights"
             STOP "parsedb2"
-            OP(31,0)
+            OP(39,0)
             OP(12,0)
             OP(13,0)
             OP(14,0)
@@ -115,8 +115,8 @@ IF((VR(94) AND 2) > 0 OR (VR(94) AND 3) > 0 OR (VR(94) AND 8) > 0)THEN
         ACCEL = 10
         DECEL = 10
 
-        OP(21,0) 'Turn off cooling air
-        OP(29,0)
+        OP(29,0) 'Turn off cooling air
+        OP(37,0)
 
         IF (VR(34) = 1) THEN
           BASE(4)
@@ -162,7 +162,7 @@ IF((VR(94) AND 2) > 0 OR (VR(94) AND 3) > 0 OR (VR(94) AND 8) > 0)THEN
 
 
 
-  OP(31,0)
+  OP(39,0)
             VR(91) = 16
         VR(90) = 1
 

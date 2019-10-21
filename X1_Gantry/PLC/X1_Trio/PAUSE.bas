@@ -16,13 +16,13 @@ IF (MTYPE AXIS(4) <> 0) THEN VR(23) = 1
 IF (MTYPE AXIS(5) <> 0) THEN VR(23) = 1
 IF (VR(23) OR VR(16) OR VR(17)) THEN ' if there is movement on any axis or in pa
 VR(23) = 0
-IF ((IN(32) = 1) AND (VR(16) = 0)) THEN VR(23) = 4
-IF ((IN(33) = 1) AND (VR(16) = 0)) THEN VR(23) = 5
+IF ((IN(40) = 1) AND (VR(16) = 0)) THEN VR(23) = 4
+IF ((IN(41) = 1) AND (VR(16) = 0)) THEN VR(23) = 5
 
 IF ((IN(3) = 0) AND( VR(16) =0))THEN VR(23) = 2
 IF ((IN(4) = 0) AND( VR(16) =0))THEN VR(23) = 3
 IF (VR(16) = 1) THEN VR(23) = 1
-IF (IN(23) = 1) THEN VR(23) = 1
+IF (IN(31) = 1) THEN VR(23) = 1
 IF (VR(17) = 1) THEN VR(23) = 1
 ENDIF
 'end giant OR statement
@@ -36,9 +36,9 @@ IF (VR(23) <> 0) THEN
             ELSEIF (VR(23) = 3) THEN
                 VR(91) = 11
             ELSEIF (VR(23) = 4) THEN
-                VR(91) = 19 ' Swapped for x2 18
+                VR(91) = 18
             ELSEIF (VR(23) = 5) THEN
-                VR(91) = 18 ' Swapped for x2 19
+                VR(91) = 19
 
             ELSE
                 VR(91) = 0 'Vehcile Paused
@@ -53,7 +53,7 @@ IF (VR(23) <> 0) THEN
         VR(21) = SPEED AXIS(4)
         VR(22) = SPEED AXIS(5)
         VR(24) = DECEL AXIS(0)
-        DECEL AXIS(0) = 175
+        DECEL AXIS(0) = 50
         SPEED AXIS(0) = 0
         SPEED AXIS(1) = 0
         SPEED AXIS(2) = 0
@@ -62,14 +62,14 @@ IF (VR(23) <> 0) THEN
         OP(35,1)
        'enters routine and in23 is still high so makes sure it switches off
         IF (PROC_STATUS PROC(4) = 0) THEN RUN "dolights",4
-        WAIT UNTIL (IN(23) = 0)
+        WAIT UNTIL (IN(31) = 0)
 
 'If it was a proximity laser then pause for atleast 5 seconds
 IF (VR(23) = 2) OR (VR(23) = 3) THEN
  WA(5000)
 ENDIF
         'Wait until pause is pressed again or stop is pressed
-WAIT UNTIL (((IN(23)=1)OR(VR(16)=0))AND((IN(3)=1)AND(IN(4)=1)))OR(VR(17)=1)
+WAIT UNTIL (((IN(31)=1)OR(VR(16)=0))AND((IN(3)=1)AND(IN(4)=1)))OR(VR(17)=1)
     OP(35,0)
     ENDIF 'If it is stoped skip the speed storing proecdure
     'If stopped
@@ -86,28 +86,19 @@ WAIT UNTIL (((IN(23)=1)OR(VR(16)=0))AND((IN(3)=1)AND(IN(4)=1)))OR(VR(17)=1)
         ENDIF
 
         BASE(0,1)
+        CANCEL
+        CANCEL
+        CANCEL
         RAPIDSTOP
         RAPIDSTOP
-        CANCEL
-        CANCEL
-        CANCEL
         SPEED = 20
         ACCEL = 10
         DECEL = 10
 
-        OP(21,0) 'Turn off cooling air
-        OP(29,0)
+        OP(29,0) 'Turn off cooling air
+        OP(37,0)
 
         STOP "zthetamonitor"
-        'If the head is not in the up position
-        IF (IN(17) <> 1) THEN
-            OP(20,0)
-            OP(19,1)
-            'add time delay for errors
-            WAIT UNTIL (IN(17) AND NOT IN(18))
-            OP(19,0)
-        ENDIF
-
         'If the head is not in the up position
         IF (IN(25) <> 1) THEN
             OP(28,0)
@@ -115,6 +106,15 @@ WAIT UNTIL (((IN(23)=1)OR(VR(16)=0))AND((IN(3)=1)AND(IN(4)=1)))OR(VR(17)=1)
             'add time delay for errors
             WAIT UNTIL (IN(25) AND NOT IN(26))
             OP(27,0)
+        ENDIF
+
+        'If the head is not in the up position
+        IF (IN(33) <> 1) THEN
+            OP(36,0)
+            OP(35,1)
+            'add time delay for errors
+            WAIT UNTIL (IN(33) AND NOT IN(34))
+            OP(35,0)
         ENDIF
 ' If it was a double job
         IF (VR(34) = 1) THEN
@@ -134,7 +134,7 @@ WAIT UNTIL (((IN(23)=1)OR(VR(16)=0))AND((IN(3)=1)AND(IN(4)=1)))OR(VR(17)=1)
 
         ELSE ' Else it was not a double job
         IF (VR(120) = 1) THEN ' If Y1 enabled
-        BASE(5)
+        BASE(4)
         CANCEL
         CANCEL
         SPEED = 90
@@ -174,7 +174,7 @@ BASE(4)
         VR(39) = 0
         VR(16) = 0
         STOP "dolights"
-        OP(31,0)
+        OP(39,0)
         VR(118) = 0 'we Are not moving
         STOP "pause"
     ELSE
@@ -197,10 +197,10 @@ BASE(4)
 
     ENDIF 'if not stopped
     'prevents routine from reentering on first if statement when button is held
-    IF (IN(23) = 1) THEN
+    IF (IN(31) = 1) THEN
         WA(750)
     ENDIF
-'    WAIT UNTIL (IN(23) = 0)
+'    WAIT UNTIL (IN(31) = 0)
 
 ENDIF
 
